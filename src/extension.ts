@@ -67,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
                     umz = umz.substr(0, em);
                 }                
                 const pcz = ﾅｲｻﾞー.ﾊﾟｽｶﾗｲｽﾞ(umz);
-                text += ﾅｲｻﾞー.ﾊﾟｽｶﾗｲｽﾞ(umz) + "\n";
+                text += ﾅｲｻﾞー.ﾊﾟｽｶﾗｲｽﾞ(umz) + ";\n";
 
                 props += `public ${part[i-1]} ${pcz} {\n    get => Record.${uriz};\n    set => Record.${uriz} = value;\n}\n`;
             }
@@ -102,6 +102,27 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
     context.subscriptions.push(disposable, registration);
+
+    let functionize = vscode.commands.registerTextEditorCommand(
+        'extension.Functionize',
+        (ｴﾃﾞｨﾀー, ｴﾃﾞｨｯﾄ) =>
+        {
+            if(ｴﾃﾞｨﾀー.selection.isEmpty) {
+                vscode.window.showInformationMessage("（ ◜◡◝ ）");
+                return;
+            }
+            //var ｼﾓﾅｲｽﾞﾃｷｽﾄ = ｴﾃﾞｨﾀー.document.getText(ｴﾃﾞｨﾀー.selection);
+            const sel = ｴﾃﾞｨﾀー.document.getText(ｴﾃﾞｨﾀー.selection);
+            let txt = "";
+            for (const k of sel.split(/[\s\t\n]+/)) {
+                txt += k + " ";
+                if (k.indexOf(';') > 0) {
+                    txt += "\n";
+                }
+            }
+            ｴﾃﾞｨｯﾄ.replace(ｴﾃﾞｨﾀー.selection, txt.trim());
+        });    
+    context.subscriptions.push(functionize);     
 
 }
 

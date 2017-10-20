@@ -17,7 +17,8 @@
 		"url" : "https://github.com/sazae657/TDD.git"
 	},    
     "activationEvents": [
-        "onCommand:extension.Struct"
+        "onCommand:extension.Struct",
+        "onCommand:extension.Functionize"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -25,7 +26,11 @@
 		{
 			"command": "extension.Struct",
 			"title": "Struct"
-		}
+        },
+		{
+			"command": "extension.Functionize",
+			"title": "Functionize"
+		}        
 		],
 		"menus": {
 			"editor/title": [
