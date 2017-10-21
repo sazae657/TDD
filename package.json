@@ -11,34 +11,33 @@
     "categories": [
         "Other"
     ],
-	"repository" :
-	{ 
-		"type" : "cvs",
-		"url" : "https://github.com/sazae657/TDD.git"
-	},    
+    "repository": {
+        "type": "cvs",
+        "url": "https://github.com/sazae657/TDD.git"
+    },
     "activationEvents": [
         "onCommand:extension.Struct",
         "onCommand:extension.Functionize"
     ],
     "main": "./out/extension",
     "contributes": {
-		"commands": [
-		{
-			"command": "extension.Struct",
-			"title": "Struct"
-        },
-		{
-			"command": "extension.Functionize",
-			"title": "Functionize"
-		}        
-		],
-		"menus": {
-			"editor/title": [
-				{
-					"command": "extension.Struct"
-				}
-			]
-		}
+        "commands": [
+            {
+                "command": "extension.Struct",
+                "title": "Struct"
+            },
+            {
+                "command": "extension.Functionize",
+                "title": "Functionize"
+            }
+        ],
+        "menus": {
+            "editor/title": [
+                {
+                    "command": "extension.Struct"
+                }
+            ]
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",

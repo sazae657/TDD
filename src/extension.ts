@@ -1,5 +1,6 @@
 'use strict';
 import * as vscode from 'vscode';
+import {Mapper} from './TypeMap';
 
 export function activate(context: vscode.ExtensionContext) {
     let previewUri = vscode.Uri.parse('struct-preview://authority/struct-preview');
@@ -24,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
             let editor = vscode.window.activeTextEditor;
             if (!editor) {
                 return this.errorSnippet("開いてるｴｼﾞﾀがないよう");
-            }            
+            }
             return this.extractSnippet();
         }
 
@@ -61,11 +62,11 @@ export function activate(context: vscode.ExtensionContext) {
                 if ((em = uriz.indexOf(';')) > 0) {
                     uriz = uriz.substr(0, em);
                 }
-                
+
                 let umz = part[i];
                 if ((em = umz.indexOf(';')) > 0) {
                     umz = umz.substr(0, em);
-                }                
+                }
                 const pcz = ﾅｲｻﾞー.ﾊﾟｽｶﾗｲｽﾞ(umz);
                 text += ﾅｲｻﾞー.ﾊﾟｽｶﾗｲｽﾞ(umz) + ";\n";
 
@@ -95,7 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
     let disposable = vscode.commands.registerCommand('extension.Struct', () => {
-        return vscode.commands.executeCommand('vscode.previewHtml', 
+        return vscode.commands.executeCommand('vscode.previewHtml',
             previewUri, vscode.ViewColumn.Two, 'かうぞうたい').then((success) => {
         }, (reason) => {
             vscode.window.showErrorMessage(reason);
@@ -121,8 +122,8 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             }
             ｴﾃﾞｨｯﾄ.replace(ｴﾃﾞｨﾀー.selection, txt.trim());
-        });    
-    context.subscriptions.push(functionize);     
+        });
+    context.subscriptions.push(functionize);
 
 }
 
