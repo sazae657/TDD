@@ -17,7 +17,8 @@
     },
     "activationEvents": [
         "onCommand:extension.Struct",
-        "onCommand:extension.Functionize"
+        "onCommand:extension.Functionize",
+        "onCommand:extension.FuncMap"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -29,12 +30,19 @@
             {
                 "command": "extension.Functionize",
                 "title": "Functionize"
+            },
+            {
+                "command": "extension.FuncMap",
+                "title": "FuncMap"
             }
         ],
         "menus": {
             "editor/title": [
                 {
                     "command": "extension.Struct"
+                },
+                {
+                    "command": "extension.FuncMap"
                 }
             ]
         }
