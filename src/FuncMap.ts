@@ -1,7 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import {ｼﾓﾅｲｻﾞー} from './Shimonizer';
-import {Mapper} from './TypeMap';
+import {Mapper} from './Mapper';
 
 class ArgDecl {
     public type:string;
@@ -117,9 +117,9 @@ export class FuncMap {
             }
 
             private toDlSym(line:FuncDecl) :string {
-                let ret = `TNK_EXPORT ${line.ret} ${line.func}_TNK("`;
+                let ret = `TNK_EXPORT ${line.ret} ${line.func}_TNK(`;
                 for(const w of line.args) {
-                    ret += `${w.type}, ${w.name}, `;
+                    ret += `${w.type} ${w.name}, `;
                 }
                 ret = ret.trim();
                 if(ret.endsWith(',')) {
@@ -146,7 +146,7 @@ export class FuncMap {
             private toImport(line: FuncDecl) :string {
                 let args = "";
                 for(const ar of line.args) {
-                    args += `${ar.type}:${ar.name}`;
+                    args += `${ar.type}:${ar.name}  `;
                 }
 
                 let ret = `// ${line.ret}: ${line.func} ${args}\n`;
@@ -181,7 +181,7 @@ export class FuncMap {
                 if( line.ret !== 'void') {
                     ret += "return ";
                 }
-                ret += `NativeMethods.${line['func']}`;
+                ret += `NativeMethods.${line['func']}(`;
                 if (argl.length != 0) {
                     ret +=  argl.join(',');
                 }
@@ -234,7 +234,7 @@ export class FuncMap {
                 provider.update(previewUri);
             }
         });*/
-        let disposable = vscode.commands.registerCommand('extension.FuncMap', () => {
+        let disposable = vscode.commands.registerCommand('extension.tnk.FuncMap', () => {
             return vscode.commands.executeCommand('vscode.previewHtml',
                 previewUri, vscode.ViewColumn.Two, '関数').then((success) =>
             {

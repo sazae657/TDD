@@ -16,33 +16,38 @@
         "url": "https://github.com/sazae657/TDD.git"
     },
     "activationEvents": [
-        "onCommand:extension.Struct",
-        "onCommand:extension.Functionize",
-        "onCommand:extension.FuncMap"
+        "onCommand:extension.tnk.Struct",
+        "onCommand:extension.tnk.Functionize",
+        "onCommand:extension.tnk.FuncMap",
+        "onCommand:extension.tnk.TypeMap"
     ],
     "main": "./out/extension",
     "contributes": {
         "commands": [
             {
-                "command": "extension.Struct",
+                "command": "extension.tnk.Struct",
                 "title": "Struct"
             },
             {
-                "command": "extension.Functionize",
+                "command": "extension.tnk.Functionize",
                 "title": "Functionize"
             },
             {
-                "command": "extension.FuncMap",
+                "command": "extension.tnk.FuncMap",
                 "title": "FuncMap"
+            },
+            {
+                "command": "extension.tnk.TypeMap",
+                "title": "TypeMap"
             }
         ],
         "menus": {
             "editor/title": [
                 {
-                    "command": "extension.Struct"
+                    "command": "extension.tnk.Struct"
                 },
                 {
-                    "command": "extension.FuncMap"
+                    "command": "extension.tnk.FuncMap"
                 }
             ]
         }

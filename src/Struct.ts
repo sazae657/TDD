@@ -100,7 +100,7 @@ export class Struct {
                 provider.update(previewUri);
             }
         });*/
-        let disposable = vscode.commands.registerCommand('extension.Struct', () => {
+        let disposable = vscode.commands.registerCommand('extension.tnk.Struct', () => {
             return vscode.commands.executeCommand('vscode.previewHtml',
                 previewUri, vscode.ViewColumn.Two, 'かうぞうたい').then((success) =>
             {

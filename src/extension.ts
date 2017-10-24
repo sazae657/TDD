@@ -2,14 +2,15 @@
 import * as vscode from 'vscode';
 import {Struct} from './Struct';
 import {FuncMap} from'./FuncMap';
-import {Mapper} from './TypeMap';
+import {Mapper} from './Mapper';
+import {TypeMap} from './TypeMap';
 
 export function activate(context: vscode.ExtensionContext) {
 
     (new Struct()).activate(context);
     const mapper = new Mapper();
     (new FuncMap()).activate(context, mapper);
-
+    (new TypeMap()).activate(context, mapper);
     const wsf = vscode.workspace.workspaceFolders;
     if (wsf) {
         mapper.SetLocalPath(wsf[0].uri);
@@ -32,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     let functionize = vscode.commands.registerTextEditorCommand(
-        'extension.Functionize',
+        'extension.tnk.Functionize',
         (ｴﾃﾞｨﾀー, ｴﾃﾞｨｯﾄ) =>
         {
             if(ｴﾃﾞｨﾀー.selection.isEmpty) {
