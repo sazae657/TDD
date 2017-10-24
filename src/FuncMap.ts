@@ -96,7 +96,7 @@ export class FuncMap {
                         n=ag[la-1]
                     }*/
                     if (!n) {
-                        throw new SyntaxError();
+                        throw new SyntaxError(`引数の書式がおかしい: ${ag}`);
                     }
 
                     if(n.startsWith('*')) {
@@ -199,9 +199,9 @@ export class FuncMap {
                     buffer += " " + s.trim();
                     if (buffer.endsWith(";")) {
                         //text += `P: ${}\n`;
-                        const f = this.parseFunc(buffer.trim());
-                        text += this.toDlSym(f) + "\n";
                         try {
+                            const f = this.parseFunc(buffer.trim());
+                            text += this.toDlSym(f) + "\n";
                             props += this.toImport(f) + "\n\n";
                             wrap += this.toWrapper(f) + "\n\n";
                         }catch(e) {
