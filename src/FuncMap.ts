@@ -3,10 +3,33 @@ import * as vscode from 'vscode';
 import {ｼﾓﾅｲｻﾞー} from './Shimonizer';
 import {Mapper} from './TypeMap';
 
+class ArgDecl {
+    public type:string;
+    public name:string;
+    constructor(x:string, y:string) {
+        this.type = x;
+        this.name = y;
+    }
+}
+
+class FuncDecl {
+    public ret: string;
+    public func: string;
+    public args: ArgDecl[];
+    constructor(x:string, y:string) {
+        this.ret = x;
+        this.func = y;
+        this.args = new Array<ArgDecl>();
+    }
+    public AddArg(arg:ArgDecl) {
+        this.args.push(arg);
+    }
+}
+
 export class FuncMap {
-    activate(context: vscode.ExtensionContext) {
+    activate(context: vscode.ExtensionContext, map:Mapper) {
+        const mappper = map;
         let previewUri = vscode.Uri.parse('funcmap-preview://authority/funcmap-preview');
-        var ﾅｲｻﾞー = new ｼﾓﾅｲｻﾞー();
         class TextDocumentContentProvider implements vscode.TextDocumentContentProvider {
             private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
 
@@ -46,39 +69,147 @@ export class FuncMap {
                 return `<body>${error}</body>`;
             }
 
+
+            private genPrp(lparam:string[], rparam:string[]) : FuncDecl {
+                let r = lparam[0]
+                let f = lparam[1];
+                if(f.startsWith('*')) {
+                    f = f.substr(1);
+                    r += "*";
+                }
+                let rpm = new FuncDecl(r, f);
+                for(let a of rparam){
+                    a = a.trim();
+                    if(a.length == 0) {
+                        continue;
+                    }
+                    let ag = a.split(/[\s\t]+/)
+                    let off = 0;
+                    if (ag.length > 2) {
+                        off = 1;
+                    }
+                    let t = ag[off];
+                    let n = ag[off+1];
+                    let la = ag.length;
+                    /*if(la > 2) {
+                        t=ag.slice(0, la-1).join(' ');
+                        n=ag[la-1]
+                    }*/
+                    if (!n) {
+                        throw new SyntaxError();
+                    }
+
+                    if(n.startsWith('*')) {
+                        n = n.substring(1);
+                        t += "*";
+                    }
+                    rpm.AddArg(new ArgDecl(t, n));
+                }
+                return rpm;
+            }
+
+            private parseFunc(str:string) : FuncDecl
+            {
+                let rr = str.split(/[\(|\)]/);
+                let lp = rr[0].split(/[\s\t]+/)
+                let rp = rr[1].split(',')
+                return this.genPrp(lp, rp);
+            }
+
+            private toDlSym(line:FuncDecl) :string {
+                let ret = `TNK_EXPORT ${line.ret} ${line.func}_TNK("`;
+                for(const w of line.args) {
+                    ret += `${w.type}, ${w.name}, `;
+                }
+                ret = ret.trim();
+                if(ret.endsWith(',')) {
+                    ret = ret.substr(0, ret.length-1);
+                }
+                ret += ") {\n    ";
+
+                if (line.ret !== 'void') {
+                    ret += "return ";
+                }
+
+                ret += `${line.func}(`;
+                for(const w of line.args) {
+                    ret += `${w.name},`;
+                }
+                ret = ret.trim();
+                if(ret.endsWith(',')) {
+                    ret = ret.substr(0, ret.length-1);
+                }
+                ret += ");\n}";
+                return ret;
+            }
+
+            private toImport(line: FuncDecl) :string {
+                let args = "";
+                for(const ar of line.args) {
+                    args += `${ar.type}:${ar.name}`;
+                }
+
+                let ret = `// ${line.ret}: ${line.func} ${args}\n`;
+
+                ret += `[DllImport(ExtremeSports.Lib, EntryPoint="${line.func}_TNK", CharSet=CharSet.Auto)]\n`;
+                ret += `internal static extern ${mappper.Map(line.ret).ret} ${line.func}(`;
+                for(const w of line.args) {
+                    ret += `${mappper.Map(w.type).arg} ${w.name}, `;
+                }
+                ret = ret.trim();
+                if (ret.endsWith(',')) {
+                    ret = ret.substr(0, ret.length-1);
+                }
+                ret += ");"
+                return ret;
+            }
+
+            private toWrapper(line: FuncDecl) :string {
+                let argl =[];
+                let ret = `\npublic static ${mappper.Map(line.ret).ret} ${line.func}(`;
+                for(const w of line.args) {
+                    ret += `${mappper.Map(w.type).arg} ${w.name}, `;
+                    argl.push(w.name);
+                }
+
+                ret = ret.trim();
+                if (ret.endsWith(',')) {
+                    ret = ret.substr(0, ret.length-1);
+                }
+                ret += ") {\n";
+                ret += "    ";
+                if( line.ret !== 'void') {
+                    ret += "return ";
+                }
+                ret += `NativeMethods.${line['func']}`;
+                if (argl.length != 0) {
+                    ret +=  argl.join(',');
+                }
+                ret += ");\n}"
+                return ret;
+            }
+
             private snippet(document: vscode.TextDocument, range: vscode.Range): string {
                 const properties = document.getText(range)//.slice(propStart, propEnd);
                 let text = "";
                 let props = "";
+                let wrap = "";
+                let buffer = "";
                 for (const s of properties.split(/\n/)) {
-                    const part = s.trim().split(/[\s\t]+/);
-                    if (part.length == 0) {
-                        break;
+                    buffer += " " + s.trim();
+                    if (buffer.endsWith(";")) {
+                        //text += `P: ${}\n`;
+                        const f = this.parseFunc(buffer.trim());
+                        text += this.toDlSym(f) + "\n";
+                        try {
+                            props += this.toImport(f) + "\n\n";
+                            wrap += this.toWrapper(f) + "\n\n";
+                        }catch(e) {
+                            vscode.window.showErrorMessage(e.toString());
+                        }
+                        buffer = "";
                     }
-                    if (part.length == 1) {
-                        text += s + "\n";
-                        continue;
-                    }
-                    let i = 0;
-                    for (i = 0; i < part.length-1; i++) {
-                        text += part[i] + " ";
-                    }
-                    let uriz = part[i];
-                    let em = 0;
-                    if ((em = uriz.indexOf(';')) > 0) {
-                        uriz = uriz.substr(0, em);
-                    }
-
-                    let umz = part[i];
-                    if ((em = umz.indexOf(';')) > 0) {
-                        umz = umz.substr(0, em);
-                    }
-                    const pcz = ﾅｲｻﾞー.ﾊﾟｽｶﾗｲｽﾞ(umz);
-                    text += ﾅｲｻﾞー.ﾊﾟｽｶﾗｲｽﾞ(umz) + ";\n";
-
-                    props += `public ${part[i-1]} ${pcz} {\n    get => Record.${uriz};\n    set => Record.${uriz} = value;\n}\n`;
                 }
-
                 return `
                     <body>
                         <div>でぶ</div>
@@ -86,6 +217,8 @@ export class FuncMap {
                         <pre>${text}</pre>
                         <hr>
                         <pre>${props}</pre>
+                        <hr>
+                        <pre>${wrap}</pre>
                     </body>`;
             }
         }

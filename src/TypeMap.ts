@@ -1,11 +1,24 @@
 'use strict';
+import * as fs from 'fs';
+import * as path from 'path';
+import {Uri} from 'vscode'
 export class Typo {
-
     public arg;
     public ret;
     constructor(x:string, y:string) {
         this.arg = x;
         this.ret = y;
+    }
+}
+
+class MapperError implements Error {
+    public name = 'MapperError';
+
+    constructor(public message: string) {
+    }
+
+    toString() {
+      return this.name + ': ' + this.message;
     }
 }
 
@@ -154,12 +167,60 @@ export class Mapper {
         'XPointFixed*':    new Typo('ref XPointFixed', 'IntPtr'),
         'XPointDouble*':    new Typo('ref XPointDouble', 'IntPtr'),
     };
+    localPath :string;
+    localMap : { [key: string]: Typo; };
+    public constructor() {
+        this.localMap = Mapper.TYPEMAP;
+    }
 
     public Map(t :string): Typo
     {   const r = Mapper.TYPEMAP[t];
 	    if(r) {
             return r;
         }
-        throw `Unknown Type <${t}>`;
+        throw new MapperError(`Unknown Type <${t}>`);
+    }
+
+    public SetLocalPath(uri: Uri) {
+        this.localPath = uri.fsPath;
+    }
+
+    public ResolveLocalMapPath() : string{
+        const fp = path.join(this.localPath, 'tnk.typemap.json');
+        return fp;
+    }
+
+    public MergeLoalMap() {
+        const fp = this.ResolveLocalMapPath();
+        fs.exists(fp, (e:boolean)=> {
+            if(!e) {
+                return;
+            }
+            fs.readFile(fp,(e, d)=>{
+                if(!d) {
+                    return;
+                }
+                const j = JSON.parse(d.toString());
+                Object.keys(j).forEach((key) =>{
+                    if (key in this.localMap) {
+                        return;
+                    }
+                    const v = j[key];
+                    this.localMap[key] =
+                        new Typo(v.arg, v.ret);
+                });
+
+            });
+        });
+    }
+
+    public SaveTypeMap() :string {
+        const fp = this.ResolveLocalMapPath();
+        fs.exists(fp, (e:boolean)=> {
+            if(!e) {
+                fs.writeFileSync(fp, JSON.stringify(Mapper.TYPEMAP, null, '  '));
+            }
+        });
+        return fp;
     }
 }
