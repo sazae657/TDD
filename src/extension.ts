@@ -4,10 +4,12 @@ import {Struct} from './Struct';
 import {FuncMap} from'./FuncMap';
 import {Mapper} from './Mapper';
 import {TypeMap} from './TypeMap';
+import {GS} from './GS';
 
 export function activate(context: vscode.ExtensionContext) {
 
     (new Struct()).activate(context);
+    (new GS()).activate(context);
     const mapper = new Mapper();
     (new FuncMap()).activate(context, mapper);
     (new TypeMap()).activate(context, mapper);

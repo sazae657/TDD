@@ -19,7 +19,8 @@
         "onCommand:extension.tnk.Struct",
         "onCommand:extension.tnk.Functionize",
         "onCommand:extension.tnk.FuncMap",
-        "onCommand:extension.tnk.TypeMap"
+        "onCommand:extension.tnk.TypeMap",
+        "onCommand:extension.tnk.GS"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -39,7 +40,11 @@
             {
                 "command": "extension.tnk.TypeMap",
                 "title": "TypeMap"
-            }
+            },
+            {
+                "command": "extension.tnk.GS",
+                "title": "GS"
+            }            
         ],
         "menus": {
             "editor/title": [
