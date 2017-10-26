@@ -59,13 +59,17 @@ export class TypeMap {
                         buffer = buffer.trim();
                         const tok = buffer.split(/[\s\t]+/);
                         let err = false;
-                        if (tok.length != 2) {
+                        if (tok.length < 2) {
                             vscode.window.showErrorMessage(`なんかおかしくね: ${lineno}: ${buffer}`);
                             buffer = "";
                             continue;
                         }
                         let type = tok[0];
                         let value = tok[1];
+                        if (tok.length > 2) {
+                            value = tok[tok.length-1];
+                            type = tok.slice(0, tok.length-1).join(' ');
+                        }
                         if (value.startsWith('*')) {
                             const li = value.lastIndexOf('*') +1;
                             type = type + value.substr(0, li);
@@ -73,7 +77,7 @@ export class TypeMap {
                         }
                         try {
                             const m = mappper.Map(type);
-                            props += `public ${m.ret} ${value}\n`;
+                            props += `public ${m.ret} ${value}    // ${type}\n`;
                         }
                         catch(e) {
                             vscode.window.showErrorMessage(`${lineno}: ${e.toString()}`);

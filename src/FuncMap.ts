@@ -71,11 +71,16 @@ export class FuncMap {
 
 
             private genPrp(lparam:string[], rparam:string[]) : FuncDecl {
-                let r = lparam[0]
+                let r = lparam[0];
                 let f = lparam[1];
+                if (lparam.length > 2) {
+                    r = lparam.slice(0, lparam.length-1).join(' ');
+                    f = lparam[lparam.length-1];
+                }
                 if(f.startsWith('*')) {
-                    f = f.substr(1);
-                    r += "*";
+                    const li = f.lastIndexOf('*') +1;
+                    r = r + f.substr(0, li);
+                    f = f.substr(li);
                 }
                 let rpm = new FuncDecl(r, f);
                 for(let a of rparam){
@@ -84,24 +89,21 @@ export class FuncMap {
                         continue;
                     }
                     let ag = a.split(/[\s\t]+/)
-                    let off = 0;
-                    if (ag.length > 2) {
-                        off = 1;
-                    }
-                    let t = ag[off];
-                    let n = ag[off+1];
+                    let t = ag[0];
+                    let n = ag[1];
                     let la = ag.length;
-                    /*if(la > 2) {
+                    if(la > 2) {
                         t=ag.slice(0, la-1).join(' ');
                         n=ag[la-1]
-                    }*/
+                    }
                     if (!n) {
                         throw new SyntaxError(`引数の書式がおかしい: ${ag}`);
                     }
 
                     if(n.startsWith('*')) {
-                        n = n.substring(1);
-                        t += "*";
+                        const li = n.lastIndexOf('*') +1;
+                        t = t + n.substr(0, li);
+                        n = n.substr(li);
                     }
                     rpm.AddArg(new ArgDecl(t, n));
                 }
