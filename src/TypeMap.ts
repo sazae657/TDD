@@ -64,9 +64,16 @@ export class TypeMap {
                             buffer = "";
                             continue;
                         }
+                        let type = tok[0];
+                        let value = tok[1];
+                        if (value.startsWith('*')) {
+                            const li = value.lastIndexOf('*') +1;
+                            type = type + value.substr(0, li);
+                            value = value.substr(li);
+                        }
                         try {
-                            const m = mappper.Map(tok[0]);
-                            props += `public ${m.ret} ${tok[1]}\n`;
+                            const m = mappper.Map(type);
+                            props += `public ${m.ret} ${value}\n`;
                         }
                         catch(e) {
                             vscode.window.showErrorMessage(`${lineno}: ${e.toString()}`);
