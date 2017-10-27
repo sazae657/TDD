@@ -36,7 +36,7 @@ export class Mapper {
         'short':    new Typo('Int16', 'Int16'),
         'Position':    new Typo('Int16', 'Int16'),
         'Position*':    new Typo('IntPtr', 'IntPtr'),
-        'unsigned short':    new Typo('UInt16', 'UInt16'),
+        'unsigned short':    new Typo('ushort', 'ushort'),
         'short*':    new Typo('out IntPtr', 'int'),
         'int':    new Typo('int', 'int'),
         'int*':    new Typo('out IntPtr', 'int'),

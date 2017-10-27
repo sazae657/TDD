@@ -1,9 +1,11 @@
 'use strict';
 import * as vscode from 'vscode';
 import {ｼﾓﾅｲｻﾞー} from './Shimonizer';
+import * as Mapper from './Mapper';
 
 export class GS {
-    activate(context: vscode.ExtensionContext) {
+    activate(context: vscode.ExtensionContext, map:Mapper.Mapper) {
+        const mappper = map;
         let previewUri = vscode.Uri.parse('gs-preview://authority/gs-preview');
         var ﾅｲｻﾞー = new ｼﾓﾅｲｻﾞー();
         class TextDocumentContentProvider implements vscode.TextDocumentContentProvider {
@@ -49,15 +51,36 @@ export class GS {
                 const properties = document.getText(range)//.slice(propStart, propEnd);
                 let text = "";
                 let props = "";
-                for (const s of properties.split(/\n/)) {
-                    const part = s.trim().split(/[\s\t]+/);
-                    if (part.length == 0) {
-                        break;
+                let impo = "";
+                let lineno = 0;
+                let buffer = "";
+                let prefix = "[HOGE]";
+                let accessor = "->";
+                for (const k of properties.split(/\n/)) {
+                    lineno ++;
+                    buffer += " " + k.trim();
+                    if (k.startsWith('.')) {
+                        buffer = buffer.trim();
+                        const v = buffer.split(/[\s\t]+/);
+                        if(v[0] === '.prefix') {
+                            prefix = v[1];
+                        }
+                        else if(v[0] === '.accessor') {
+                            accessor = v[1];
+                        }
+                        buffer = "";
+                        continue
                     }
-                    if (part.length == 1) {
-                        text += s + "\n";
+                    if (! buffer.endsWith(";")) {
                         continue;
                     }
+                    const part = buffer.trim().split(/[\s\t]+/);
+                    if (part.length < 2) {
+                        vscode.window.showErrorMessage(`なんかおかしくね: ${lineno}: ${buffer}`);
+                        buffer = "";
+                        continue;
+                    }
+
                     let t = part[0];
                     let n = part[1];
                     let la = part.length;
@@ -75,10 +98,33 @@ export class GS {
                         n = n.substr(0, n.length-1);
                     }
                     const pcz = ﾅｲｻﾞー.ﾊﾟｽｶﾗｲｽﾞ(n);
-                    text += `${t} Get[Hoge]${pcz}([HOGE*] ptr) { return ptr->${n}; }\n`
-                    text += `void Set[Hoge]${pcz}([HOGE*] ptr, ${t} value) { ptr->${n} = value; }\n`
+                    const get_fn = `TNK_Get${prefix}${pcz}`;
+                    const set_fn = `TNK_Set${prefix}${pcz}`;
 
-                    //props += `public ${part[i-1]} ${pcz} {\n    get => Record.${uriz};\n    set => Record.${uriz} = value;\n}\n`;
+                    let map = new Mapper.Typo('*ERR*', '*ERR*');
+                    try {
+                        map = mappper.Map(t);
+                    }
+                    catch(e) {
+                        vscode.window.showErrorMessage(`${lineno}: ${e.toString()}`);
+                    }
+
+                    text += `\n${t} ${get_fn}(${prefix}* ptr) { return ptr${accessor}${n}; }\n`
+                    text += `void ${set_fn}(${prefix}* ptr, ${t} value) { ptr${accessor}${n} = value; }\n`
+
+                    impo += `\n// ${t}\n`;
+                    impo += `[DllImport(ExtremeSports.Lib, EntryPoint="${get_fn}", CharSet=CharSet.Auto)]\n`;
+                    impo += `internal static extern ${map.ret} ${get_fn}(IntPtr ptr);\n`;
+
+                    impo += `[DllImport(ExtremeSports.Lib, EntryPoint="${set_fn}", CharSet=CharSet.Auto)]\n`;
+                    impo += `internal static extern void ${set_fn}(IntPtr ptr, ${map.arg} omg);\n`;
+
+                    props += `\npublic ${map.ret} ${pcz} {\n`;
+                    props += `    get => NativeMethods.${get_fn}(this.Pounter);\n`;
+                    props += `    set => NativeMethods.${set_fn}(this.Pounter, value);\n`;
+                    props += '}\n'
+
+                    buffer = "";
                 }
 
                 return `
@@ -86,6 +132,8 @@ export class GS {
                         <div>でぶ</div>
                         <hr>
                         <pre>${text}</pre>
+                        <hr>
+                        <pre>${impo}</pre>
                         <hr>
                         <pre>${props}</pre>
                     </body>`;
@@ -106,4 +154,5 @@ export class GS {
         context.subscriptions.push(disposable, registration);
     }
 }
+
 

@@ -9,10 +9,13 @@ import {GS} from './GS';
 export function activate(context: vscode.ExtensionContext) {
 
     (new Struct()).activate(context);
-    (new GS()).activate(context);
+
     const mapper = new Mapper();
+
     (new FuncMap()).activate(context, mapper);
     (new TypeMap()).activate(context, mapper);
+    (new GS()).activate(context, mapper);
+
     const wsf = vscode.workspace.workspaceFolders;
     if (wsf) {
         mapper.SetLocalPath(wsf[0].uri);
