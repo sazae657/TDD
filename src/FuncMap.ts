@@ -170,7 +170,7 @@ export class FuncMap {
                 let argl =[];
                 let ret = `\npublic static ${mappper.Map(line.ret).ret} ${line.func}(`;
                 for(const w of line.args) {
-                    ret += `${mappper.Map(w.type).arg} ${w.name}, `;
+                    ret += `${mappper.Map(w.type).arg_cs} ${w.name}, `;
                     argl.push(w.name);
                 }
 

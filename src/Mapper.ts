@@ -3,11 +3,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {Uri} from 'vscode'
 export class Typo {
-    public arg;
-    public ret;
+    public arg :string;
+    public ret :string;
+    public arg_cs :string;
     constructor(x:string, y:string) {
         this.arg = x;
         this.ret = y;
+        this.arg_cs = x.replace(/\[.*\]\s+/, "");
     }
 }
 
