@@ -44,7 +44,7 @@
             {
                 "command": "extension.tnk.GS",
                 "title": "GS"
-            }            
+            }
         ],
         "menus": {
             "editor/title": [
@@ -68,6 +68,7 @@
         "typescript": "^2.5.3",
         "vscode": "^1.1.5",
         "fs": "^0.0.2",
+        "validator": "^9.1.1",
         "@types/node": "^7.0.43",
         "@types/mocha": "^2.2.42"
     }

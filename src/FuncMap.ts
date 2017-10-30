@@ -2,6 +2,7 @@
 import * as vscode from 'vscode';
 import {ｼﾓﾅｲｻﾞー} from './Shimonizer';
 import {Mapper} from './Mapper';
+import {escape} from 'validator';
 
 class ArgDecl {
     public type:string;
@@ -197,7 +198,10 @@ export class FuncMap {
                 let props = "";
                 let wrap = "";
                 let buffer = "";
+                let errors = "";
+                let lineno = 0;
                 for (const s of properties.split(/\n/)) {
+                    lineno++;
                     buffer += " " + s.trim();
                     if (buffer.endsWith(";")) {
                         //text += `P: ${}\n`;
@@ -208,13 +212,19 @@ export class FuncMap {
                             wrap += this.toWrapper(f) + "\n\n";
                         }catch(e) {
                             vscode.window.showErrorMessage(e.toString());
+                            errors += `${lineno}: ${e.toString()}\n`
                         }
                         buffer = "";
                     }
                 }
+                errors = escape(errors);
+                text = escape(text);
+                props = escape(props);
+                wrap = escape(wrap);
                 return `
                     <body>
                         <div>でぶ</div>
+                        <pre>${errors}</pre>
                         <hr>
                         <pre>${text}</pre>
                         <hr>
