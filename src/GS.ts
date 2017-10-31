@@ -1,7 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
-import {ｼﾓﾅｲｻﾞー} from './Shimonizer';
-import * as Mapper from './Mapper';
+import {ｼﾓﾅｲｻﾞー} from './lib/Shimonizer';
+import * as Mapper from './lib/Mapper';
 
 export class GS {
     activate(context: vscode.ExtensionContext, map:Mapper.Mapper) {

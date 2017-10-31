@@ -1,7 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
-import {ｼﾓﾅｲｻﾞー} from './Shimonizer';
-import {Mapper} from './Mapper';
+import {ｼﾓﾅｲｻﾞー} from './lib/Shimonizer';
+import {Mapper} from './lib/Mapper';
 
 export class TypeMap {
     activate(context: vscode.ExtensionContext, map:Mapper) {

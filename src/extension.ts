@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import {Struct} from './Struct';
 import {FuncMap} from'./FuncMap';
-import {Mapper} from './Mapper';
+import {Mapper} from './lib/Mapper';
 import {TypeMap} from './TypeMap';
 import {GS} from './GS';
 

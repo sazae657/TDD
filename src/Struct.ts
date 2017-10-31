@@ -1,6 +1,6 @@
 'use strict';
 import * as vscode from 'vscode';
-import {ｼﾓﾅｲｻﾞー} from './Shimonizer';
+import {ｼﾓﾅｲｻﾞー} from './lib/Shimonizer';
 
 export class Struct {
     activate(context: vscode.ExtensionContext) {

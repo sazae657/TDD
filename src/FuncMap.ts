@@ -1,31 +1,10 @@
 'use strict';
 import * as vscode from 'vscode';
-import {ｼﾓﾅｲｻﾞー} from './Shimonizer';
-import {Mapper} from './Mapper';
+import * as cf from './lib/CFunc'
+import {ｼﾓﾅｲｻﾞー} from './lib/Shimonizer';
+import {Mapper} from './lib/Mapper';
 import {escape} from 'validator';
 
-class ArgDecl {
-    public type:string;
-    public name:string;
-    constructor(x:string, y:string) {
-        this.type = x;
-        this.name = y;
-    }
-}
-
-class FuncDecl {
-    public ret: string;
-    public func: string;
-    public args: ArgDecl[];
-    constructor(x:string, y:string) {
-        this.ret = x;
-        this.func = y;
-        this.args = new Array<ArgDecl>();
-    }
-    public AddArg(arg:ArgDecl) {
-        this.args.push(arg);
-    }
-}
 
 export class FuncMap {
     activate(context: vscode.ExtensionContext, map:Mapper) {
@@ -70,59 +49,10 @@ export class FuncMap {
                 return `<body>${error}</body>`;
             }
 
-
-            private genPrp(lparam:string[], rparam:string[]) : FuncDecl {
-                let r = lparam[0];
-                let f = lparam[1];
-                if (lparam.length > 2) {
-                    r = lparam.slice(0, lparam.length-1).join(' ');
-                    f = lparam[lparam.length-1];
-                }
-                if(f.startsWith('*')) {
-                    const li = f.lastIndexOf('*') +1;
-                    r = r + f.substr(0, li);
-                    f = f.substr(li);
-                }
-                let rpm = new FuncDecl(r, f);
-                for(let a of rparam){
-                    a = a.trim();
-                    if(a.length == 0) {
-                        continue;
-                    }
-                    let ag = a.split(/[\s\t]+/)
-                    let t = ag[0];
-                    let n = ag[1];
-                    let la = ag.length;
-                    if(la > 2) {
-                        t=ag.slice(0, la-1).join(' ');
-                        n=ag[la-1]
-                    }
-                    if (!n) {
-                        throw new SyntaxError(`引数の書式がおかしい: ${ag}`);
-                    }
-
-                    if(n.startsWith('*')) {
-                        const li = n.lastIndexOf('*') +1;
-                        t = t + n.substr(0, li);
-                        n = n.substr(li);
-                    }
-                    rpm.AddArg(new ArgDecl(t, n));
-                }
-                return rpm;
-            }
-
-            private parseFunc(str:string) : FuncDecl
-            {
-                let rr = str.split(/[\(|\)]/);
-                let lp = rr[0].split(/[\s\t]+/)
-                let rp = rr[1].split(',')
-                return this.genPrp(lp, rp);
-            }
-
-            private toDlSym(line:FuncDecl) :string {
+            private toDlSym(line:cf.FuncDecl) :string {
                 let ret = `TNK_EXPORT ${line.ret} ${line.func}_TNK(`;
                 for(const w of line.args) {
-                    ret += `${w.type} ${w.name}, `;
+                    ret += `${w.modifier!=="" ? w.modifier+" ": ""}${w.type} ${w.name}, `;
                 }
                 ret = ret.trim();
                 if(ret.endsWith(',')) {
@@ -146,10 +76,10 @@ export class FuncMap {
                 return ret;
             }
 
-            private toImport(line: FuncDecl) :string {
+            private toImport(line: cf.FuncDecl) :string {
                 let args = "";
                 for(const ar of line.args) {
-                    args += `${ar.type}:${ar.name}  `;
+                    args += `${ar.modifier!=="" ? ar.modifier+" ": ""}${ar.type}:${ar.name}  `;
                 }
 
                 let ret = `// ${line.ret}: ${line.func} ${args}\n`;
@@ -167,7 +97,7 @@ export class FuncMap {
                 return ret;
             }
 
-            private toWrapper(line: FuncDecl) :string {
+            private toWrapper(line: cf.FuncDecl) :string {
                 let argl =[];
                 let ret = `\npublic static ${mappper.Map(line.ret).ret} ${line.func}(`;
                 for(const w of line.args) {
@@ -200,13 +130,15 @@ export class FuncMap {
                 let buffer = "";
                 let errors = "";
                 let lineno = 0;
+                const fp = new cf.CFunc();
                 for (const s of properties.split(/\n/)) {
                     lineno++;
                     buffer += " " + s.trim();
                     if (buffer.endsWith(";")) {
                         //text += `P: ${}\n`;
                         try {
-                            const f = this.parseFunc(buffer.trim());
+                            buffer = buffer.replace(/\s+\(/, '(');
+                            const f = fp.Parse(buffer.trim());
                             text += this.toDlSym(f) + "\n";
                             props += this.toImport(f) + "\n\n";
                             wrap += this.toWrapper(f) + "\n\n";
