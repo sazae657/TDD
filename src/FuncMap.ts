@@ -50,7 +50,7 @@ export class FuncMap {
             }
 
             private toDlSym(line:cf.FuncDecl) :string {
-                let ret = `TNK_EXPORT ${line.ret} ${line.func}_TNK(`;
+                let ret = `TNK_EXPORT ${line.modifier!=="" ? line.modifier+" ": ""}${line.ret} ${line.func}_TNK(`;
                 for(const w of line.args) {
                     ret += `${w.modifier!=="" ? w.modifier+" ": ""}${w.type} ${w.name}, `;
                 }
@@ -82,7 +82,7 @@ export class FuncMap {
                     args += `${ar.modifier!=="" ? ar.modifier+" ": ""}${ar.type}:${ar.name}  `;
                 }
 
-                let ret = `// ${line.ret}: ${line.func} ${args}\n`;
+                let ret = `// ${line.modifier!=="" ? line.modifier+" ": ""}${line.ret}: ${line.func} ${args}\n`;
 
                 ret += `[DllImport(ExtremeSports.Lib, EntryPoint="${line.func}_TNK", CharSet=CharSet.Auto)]\n`;
                 ret += `internal static extern ${mappper.Map(line.ret).ret} ${line.func}(`;
@@ -99,7 +99,12 @@ export class FuncMap {
 
             private toWrapper(line: cf.FuncDecl) :string {
                 let argl =[];
-                let ret = `\npublic static ${mappper.Map(line.ret).ret} ${line.func}(`;
+                let args = "";
+                for(const ar of line.args) {
+                    args += `${ar.modifier!=="" ? ar.modifier+" ": ""}${ar.type}:${ar.name}  `;
+                }
+                let ret = `\n// ${line.modifier!=="" ? line.modifier+" ": ""}${line.ret}: ${line.func} ${args}`;
+                ret += `\npublic static ${mappper.Map(line.ret).ret} ${line.func}(`;
                 for(const w of line.args) {
                     ret += `${mappper.Map(w.type).arg_cs} ${w.name}, `;
                     argl.push(w.name);

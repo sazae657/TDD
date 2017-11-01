@@ -13,10 +13,12 @@ export class ArgDecl {
 export class FuncDecl {
     public ret: string;
     public func: string;
+    public modifier:string;
     public args: ArgDecl[];
-    constructor(x:string, y:string) {
+    constructor(x:string, y:string, z:string) {
         this.ret = x;
         this.func = y;
+        this.modifier = z;
         this.args = new Array<ArgDecl>();
     }
     public AddArg(arg:ArgDecl) {
@@ -29,16 +31,28 @@ export class CFunc {
     private genPrp(lparam:string[], rparam:string[]) : FuncDecl {
         let r = lparam[0];
         let f = lparam[1];
+        let modifier = "";
         if (lparam.length > 2) {
-            r = lparam.slice(0, lparam.length-1).join(' ');
             f = lparam[lparam.length-1];
+            r = "";
+            for (const k of lparam.slice(0, lparam.length-1)) {
+                if (k.match(/(_X)?[Cc]onst/)) {
+                    modifier = k;
+                    continue;
+                }
+                r = r + ((k ==="*") ? k :" ") + k;
+            }
+            r = r.trim();
         }
+
         if(f.startsWith('*')) {
             const li = f.lastIndexOf('*') +1;
             r = r + f.substr(0, li);
             f = f.substr(li);
         }
-        let rpm = new FuncDecl(r, f);
+
+        let rpm = new FuncDecl(r, f, modifier);
+
         for(let a of rparam){
             a = a.trim();
             if(a.length == 0) {
@@ -48,7 +62,7 @@ export class CFunc {
             let t = ag[0];
             let n = ag[1];
             let la = ag.length;
-            let modifier = "";
+            modifier = "";
             if(la > 2) {
                 if (t.match(/(_X)?[Cc]onst/)) {
                     modifier = t;
