@@ -114,16 +114,16 @@ export class FuncMap {
                 if (ret.endsWith(',')) {
                     ret = ret.substr(0, ret.length-1);
                 }
-                ret += ") {\n";
+                ret += ") =>\n";
                 ret += "    ";
-                if( line.ret !== 'void') {
-                    ret += "return ";
-                }
+                //if( line.ret !== 'void') {
+                //    ret += "return ";
+               //}
                 ret += `NativeMethods.${line['func']}(`;
                 if (argl.length != 0) {
                     ret +=  argl.join(',');
                 }
-                ret += ");\n}"
+                ret += ");\n"
                 return ret;
             }
 
